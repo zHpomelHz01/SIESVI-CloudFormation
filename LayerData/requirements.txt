@@ -1,0 +1,4 @@
+pickle-mixin
+sklearn
+scikit-learn==0.22.2
+numpy==1.17.0

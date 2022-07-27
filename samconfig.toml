@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "siesvi"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1fus3l0fu5ofa"
+s3_prefix = "siesvi"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"

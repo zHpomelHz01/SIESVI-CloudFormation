@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html >
+<!--From https://codepen.io/frytyler/pen/EGdtg-->
+<head>
+  <meta charset="UTF-8">
+  <title>ML API</title>
+  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+
+
+</head>
+
+<body>
+ <div class="login">
+	<h1>SIESVI PREDICTION</h1>
+
+     <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict')}}"method="post">
+    	<input type="text" name="RH" placeholder="RH" required="required" />
+        <input type="text" name="TMP" placeholder="TMP" required="required" />
+        <input type="text" name="WDR" placeholder="WDR" required="required" />
+        <input type="text" name="WSP" placeholder="WSP" required="required" />
+        <input type="text" name="latitud" placeholder="latitud" required="required" />
+        <input type="text" name="longitud" placeholder="longitud" required="required" />
+        <input type="text" name="Temp_Avg" placeholder="Temp_Avg" required="required" />
+        <input type="text" name="RH_Avg" placeholder="RH_Avg" required="required" />
+        <input type="text" name="WSpeed_Avg" placeholder="WSpeed_Avg" required="required" />
+        <input type="text" name="WSpeed_Max" placeholder="WSpeed_Max" required="required" />
+        <input type="text" name="WDir_Avg" placeholder="WDir_Avg" required="required" />
+        <input type="text" name="WDir_SD" placeholder="WDir_SD" required="required" />
+        <input type="text" name="Rain_Tot" placeholder="Rain_Tot" required="required" />
+        <input type="text" name="Press_Avg" placeholder="Press_Avg" required="required" />
+        <input type="text" name="Rad_Avg" placeholder="Rad_Avg" required="required" />
+        <input type="text" name="Anio" placeholder="Anio" required="required" />
+
+        <button type="submit" class="btn btn-primary btn-block btn-large">Predict</button>
+    </form>
+
+   <br>
+   <br>
+   {{ prediction_text }}
+
+ </div>
+
+
+</body>
+</html>

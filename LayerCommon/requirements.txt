@@ -1,0 +1,6 @@
+flask-lambda-python36
+requests==2.24.0
+boto3==1.16.62
+DateTime==4.1.1
+PyJWT==1.7.1
+pytz

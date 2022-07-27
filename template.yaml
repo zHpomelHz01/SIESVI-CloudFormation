@@ -1,0 +1,229 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  siesvi-api
+
+  Sample SAM Template for siesvi-api
+
+Globals:
+  Function:
+    Timeout: 4
+  Api:
+    Cors: "'*'"
+
+Resources:
+  Executed:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Executed
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  HistoricalData:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: HistoricalData
+      AttributeDefinitions:
+        - AttributeName: id_consultaOpenStreetMap
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id_consultaOpenStreetMap
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 10
+
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: UsersTable
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  ScheduleTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ScheduleTable
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  LayerRequest:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: LayerRequest
+      Description: Dependencies for lambda layer Request
+      ContentUri: LayerRequest/
+    Metadata:
+      BuildMethod: makefile
+      LicenseInfo: 'MIT'
+      CompatibleRuntimes:
+        - python3.7
+  LayerData:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: LayerData
+      Description: Dependencies for lambda layer Data
+      ContentUri: LayerData/
+    Metadata:
+      BuildMethod: makefile
+      LicenseInfo: 'MIT'
+      CompatibleRuntimes:
+        - python3.7
+
+  LayerCommon:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: LayerCommon
+      Description: Dependencies for lambda layer Common
+      ContentUri: LayerCommon/
+    Metadata:
+      BuildMethod: makefile
+      LicenseInfo: 'MIT'
+      CompatibleRuntimes:
+        - python3.7
+  SiesviFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: managementLambda/
+      Handler: app.app
+      Runtime: python3.7
+      Layers:
+        - !Ref LayerRequest
+        - !Ref LayerCommon
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: "*"
+      Events:
+        RootEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get
+            RequestParameters:
+              - method.request.header.Authorization:
+                  Required: true
+                  Caching: true
+        login:
+          Type: Api
+          Properties:
+            Path: /users/login
+            Method: post
+        signup:
+          Type: Api
+          Properties:
+            Path: /users/signup
+            Method: post
+        addTask:
+          Type: Api
+          Properties:
+            Path: /schedule
+            Method: post
+        getTasks:
+          Type: Api
+          Properties:
+            Path: /schedule
+            Method: get
+        deleteTask:
+          Type: Api
+          Properties:
+            Path: /schedule/{scheduleID}
+            Method: delete
+        updateTask:
+          Type: Api
+          Properties:
+            Path: /schedule/{scheduleID}
+            Method: put
+        getSpecificTask:
+          Type: Api
+          Properties:
+            Path: /schedule/{scheduleID}
+            Method: get
+        getAccidents:
+          Type: Api
+          Properties:
+            Path: /accidents/{idAccidentes}
+            Method: get
+
+  externalFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: externalAuth/
+      Handler: app.app
+      Runtime: python3.7
+      Layers:
+        - !Ref LayerCommon
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: "*"
+      Events:
+        loginExt:
+          Type: Api
+          Properties:
+            Path: /login
+            Method: get
+        authorize:
+          Type: Api
+          Properties:
+            Path: /authorize
+            Method: get
+
+  PredictFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: predictLambda/
+      Handler: app.app
+      Runtime: python3.7
+      Layers:
+        - !Ref LayerCommon
+        - !Ref LayerData
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: "*"
+      Events:
+        makepr:
+          Type: Api
+          Properties:
+            Path: /predict_api
+            Method: post
+        makePredict:
+          Type: Api
+          Properties:
+            Path: /predict
+            Method: post
+Outputs:
+  SiesviApi:
+    Description: "API Gateway endpoint URL for Prod stage for Siesvi function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  SiesviFunction:
+    Description: "Siesvi Lambda Function ARN"
+    Value: !GetAtt SiesviFunction.Arn
+  PredictFunction:
+    Description: "Predict Lambda Function ARN"
+    Value: !GetAtt PredictFunction.Arn
+  SiesviFunctionIamRole:
+    Description: "Implicit IAM Role created for Siesvi function"
+    Value: !GetAtt SiesviFunctionRole.Arn
